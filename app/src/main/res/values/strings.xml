@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">MusicLife</string>
+    <string name="text_music">Music</string>
+    <string name="text_discover">Discover</string>
+    <string name="text_songs">Songs</string>
+    <string name="text_playlist">Play Lists</string>
+    <string name="text_artist">Artists</string>
+    <string name="text_failed_delete">Failed To Delete Item</string>
+    <string name="text_empty_song_list">Your Songs Will Be Listed Here</string>
+    <string name="text_shuffle">Shuffle</string>
+    <string name="text_add_favourite">Add To Favourites</string>
+    <string name="text_added">Added</string>
+    <string name="text_add_playlist">Add To Playlist</string>
+    <string name="text_add_queue">Add To Queue</string>
+    <string name="text_change_photo">Change Photo</string>
+    <string name="text_best_part">Best Part</string>
+    <string name="text_automatic_volume">Automatic Volume</string>
+    <string name="text_cancel">Cancel</string>
+</resources>

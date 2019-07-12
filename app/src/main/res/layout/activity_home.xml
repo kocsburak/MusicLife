@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        android:animateLayoutChanges="true"
+        android:layout_height="wrap_content">
+
+    <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar"
+            android:background="@color/colorPrimaryDark"
+            android:layout_height="70dp"
+            android:layout_width="match_parent">
+        <android.support.design.widget.CollapsingToolbarLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                app:contentScrim="?attr/colorPrimary">
+            <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" android:visibility="visible">
+
+                <TextView
+                        android:text="@string/text_discover"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#fff"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:id="@+id/textViewDiscover" app:layout_constraintStart_toStartOf="parent"
+                        android:layout_marginStart="16dp" android:layout_marginBottom="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="1.0" android:visibility="visible"/>
+                <TextView
+                        android:text="@string/text_music"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorGray"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:alpha="0.5"
+                        android:id="@+id/textViewMusic" app:layout_constraintStart_toEndOf="@+id/textViewDiscover"
+                        android:layout_marginStart="24dp" android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="1.0" android:visibility="visible"
+                        android:layout_marginEnd="8dp" app:layout_constraintEnd_toStartOf="@+id/imageViewSearch"
+                        app:layout_constraintHorizontal_bias="0.0"/>
+                <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:src="@drawable/ic_settings_white_24dp"
+                        android:id="@+id/imageViewSettings" app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginEnd="16dp"
+                        app:layout_constraintTop_toTopOf="@+id/textViewMusic"
+                        app:layout_constraintBottom_toBottomOf="@+id/textViewMusic"
+                        android:visibility="visible"/>
+                <android.support.constraint.Group android:layout_width="wrap_content"
+                                                  android:layout_height="wrap_content" android:id="@+id/groupToolbar"
+                                                  app:constraint_referenced_ids="imageViewSettings,textViewMusic,textViewDiscover"
+                                                  android:visibility="gone"/>
+                <ImageView
+                        android:layout_width="wrap_content"
+                        android:clickable="true"
+                        android:layout_height="wrap_content" android:src="@drawable/ic_search_white_24dp"
+                        android:id="@+id/imageViewSearch" app:layout_constraintEnd_toStartOf="@+id/imageViewSettings"
+                        android:layout_marginEnd="8dp" app:layout_constraintBottom_toBottomOf="@+id/imageViewSettings"
+                        app:layout_constraintTop_toTopOf="@+id/imageViewSettings" android:visibility="gone"/>
+            </android.support.constraint.ConstraintLayout>
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
+    <android.support.v4.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" android:id="@+id/scrollView">
+        <android.support.constraint.ConstraintLayout
+                android:id="@+id/fragment_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:minHeight="250dp"/>
+    </android.support.v4.widget.NestedScrollView>
+
+
+    <android.support.constraint.ConstraintLayout
+            android:id="@+id/mini_pl"
+            android:background="@color/colorPrimary"
+            android:layout_gravity="bottom"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="5dp"
+            android:clickable="true"
+            android:layout_width="match_parent"
+            android:layout_height="50dp" android:visibility="gone">
+
+    </android.support.constraint.ConstraintLayout>
+
+
+
+
+</android.support.design.widget.CoordinatorLayout>
