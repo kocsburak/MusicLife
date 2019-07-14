@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 
 
 class Database(val context: Context) :
@@ -101,13 +102,12 @@ class Database(val context: Context) :
         val db = this.writableDatabase
         val cv = ContentValues()
         cv.put(COL_SONG_PATH, path)
-        //cv.put(COL_SONG_PHOTO, image)
         db.insert(TABLE_SONG, null, cv)
         db.close()
     }
 
 
-    internal fun updatePhoto(image: ByteArray, path: String) {
+    internal fun updatePhoto(image: ByteArray?, path: String) {
         val db = this.writableDatabase
         val cv = ContentValues()
         cv.put(COL_SONG_PHOTO, image)
@@ -126,7 +126,8 @@ class Database(val context: Context) :
         val query = "SELECT * FROM $TABLE_SONG WHERE $COL_SONG_PATH = ?"
         val result = sqliteDB.rawQuery(query, Array<String>(1) { path })
         while (result.moveToNext()) {
-            return result.getBlob(1)
+            Log.e("Photo",result.getBlob(1).toString())
+            return result.getBlob(2)
         }
 
         sqliteDB.close()

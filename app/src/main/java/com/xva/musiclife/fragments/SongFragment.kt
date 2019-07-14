@@ -12,7 +12,6 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
 import android.support.v4.content.ContextCompat.checkSelfPermission
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -20,7 +19,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.TextView
 import android.widget.Toast
 import com.xva.musiclife.R
 import com.xva.musiclife.activities.SongSettingsActivity
@@ -46,7 +44,7 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
     // permission callback code
     private val READ_EXTERNAL_STORAGE_CODE = 10
     // last song item view for change text color
-    private var lastSongView: View? = null
+    private var lastPlayedSongPosition = -1
     // handle shuffle button scroll
     private var oldState = -10000
     private var isDone = false
@@ -97,7 +95,6 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
         EventBus.getDefault().unregister(this)
     }
 
-
     private fun readPermission() {
         if (checkSelfPermission(
                 activity!!,
@@ -117,7 +114,6 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
         }
     }
 
-
     private fun getSongs() {
         if (songs.size == 0) {
 
@@ -131,7 +127,8 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)),
-                        null
+                        null,
+                        false
                     )
 
 
@@ -140,7 +137,12 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
                 } while (cursor.moveToNext())
             }
         }
-        Log.e("song", songs.size.toString())
+
+        var song = Song("ss", "ss", "ss", "ss", null, false)
+        for (i in 0..20) {
+            songs.add(song)
+        }
+
         setupAdapter()
     }
 
@@ -162,15 +164,14 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
                 bm.compress(Bitmap.CompressFormat.PNG, 100, stream)
                 var byteArray = stream.toByteArray()
                 bm.recycle()
-                Log.e("songPhoto",byteArray.toString())
+                Log.e("songPhoto", byteArray.toString())
                 return byteArray
             }
         } catch (e: Exception) {
         }
-        Log.e("songPhoto","null")
+        Log.e("songPhoto", "null")
         return null
     }
-
 
     private fun setupAdapter() {
         songsAdapter = SongAdapter(songs, this, activity!!)
@@ -181,11 +182,9 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
         }
     }
 
-
     private fun loadEverything() {
         getSongs()
     }
-
 
     @Subscribe(sticky = true)
     internal fun onDataEvent(data: EventBusHelper.permissionStatus) {
@@ -200,28 +199,48 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
     }
 
     @Subscribe(sticky = true)
-    internal fun onDataEvent(data: EventBusHelper.lastSongView) {
+    internal fun onDataEvent(data: EventBusHelper.lastSongPosition) {
         // en son çalınan şarkının view ını aldık on item clickte rengini degiştirmek için
-        this.lastSongView = data.songView
+        this.lastPlayedSongPosition = data.position
+    }
+
+    @Subscribe(sticky = true)
+    internal fun onDataEvent(data: EventBusHelper.playingSong) {
+        findNewSongPosition(data.song)
+
+    }
+
+
+    private fun findNewSongPosition(song:Song) {
+
+        for (i in 0..songs.size) {
+            if (song.path == songs[i].path) {
+                changeSongTextColor(i)
+                break
+            }
+        }
+    }
+
+    private fun changeSongTextColor(index: Int) {
+        if (lastPlayedSongPosition != -1) {
+            songs[lastPlayedSongPosition].isPlaying = false
+            songsAdapter.notifyItemChanged(lastPlayedSongPosition)
+        }
+
+        songs[index].isPlaying = true
+        songsAdapter.notifyItemChanged(index)
+        lastPlayedSongPosition = index
     }
 
 
     override fun onItemClick(view: View?, position: Int?, `object`: String?) {
         if (`object` == "mainView") {
-            if (lastSongView != null) {
-                // set white color  last song textview
-                var lastSongTextView = lastSongView!!.findViewById(R.id.textViewSongName) as TextView
-                lastSongTextView.setTextColor(ContextCompat.getColorStateList(activity!!, R.color.colorWhite))
-            }
-            var textView = view!!.findViewById(R.id.textViewSongName) as TextView
-            textView.setTextColor(ContextCompat.getColorStateList(activity!!, R.color.colorGreen))
-            lastSongView = view
+              changeSongTextColor(position!!)
         } else {
             // Song Settings
             startSongsSetting()
         }
     }
-
 
     private fun showShuffleButton() {
         mView.buttonFirstShuffle.visibility = View.VISIBLE

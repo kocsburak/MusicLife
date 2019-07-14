@@ -53,7 +53,8 @@ class SharedPrefencesHelper {
             sharedPreferences.getString("LastSongName", "-1"),
             sharedPreferences.getString("LastSongArtist", "-1"),
             sharedPreferences.getString("LastSongDuration", "-1"),
-            sharedPreferences.getString("LastSongImage","-1").toByteArray()
+            sharedPreferences.getString("LastSongImage","-1").toByteArray(),
+            true
         )
     }
 

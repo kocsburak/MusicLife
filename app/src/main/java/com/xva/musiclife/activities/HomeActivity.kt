@@ -51,6 +51,7 @@ class HomeActivity : AppCompatActivity(), View.OnClickListener {
         textViewDiscover.setOnClickListener(this)
         textViewMusic.setOnClickListener(this)
         imageViewSettings.setOnClickListener(this)
+
     }
 
     private fun showToolBar() {

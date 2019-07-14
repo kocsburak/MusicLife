@@ -25,20 +25,23 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     private SharedPrefencesHelper sharedPrefencesHelper;
     private Song lastSong;
     private Context mContext;
+    private Boolean isLastSongChecked = false;
+
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView mName;
         private TextView mArtist;
         private ImageView mSettings;
+        private View mView;
 
         public MyViewHolder(final View itemView, final onItemClick listener) {
             super(itemView);
             mName = itemView.findViewById(R.id.textViewSongName);
             mArtist = itemView.findViewById(R.id.textViewArtist);
             mSettings = itemView.findViewById(R.id.imageViewSongSettings);
-
-
+            mView = itemView.findViewById(R.id.viewSongSettings);
         }
+
     }
 
     public SongAdapter(ArrayList<Song> data, onItemClick listener, Context context) {
@@ -55,6 +58,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         return new MyViewHolder(itemView, listener);
     }
 
+
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         holder.mName.setText(data.get(position).getName());
@@ -64,14 +68,13 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             public void onClick(View v) {
                 listener.onItemClick(holder.itemView, position, "mainView");
                 EventBus.getDefault().postSticky(new EventBusHelper.playingSong(data.get(position)));
-                sharedPrefencesHelper.saveLastSong(data.get(position));
                 lastSong = data.get(position);
-                Log.e("position","" + data.get(position).getName());
+                Log.e("position", "" + data.get(position).getName());
                 EventBus.getDefault().postSticky(new EventBusHelper.isShowMiniPl("show"));
             }
         });
 
-        holder.mSettings.setOnClickListener(new View.OnClickListener() {
+        holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 listener.onItemClick(holder.itemView, position, "settings");
@@ -81,14 +84,22 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         });
 
 
-        if (lastSong.getPath().equals(data.get(position).getPath())) {
-            Log.e("position",lastSong.getName());
+        if (!isLastSongChecked && lastSong.getPath().equals(data.get(position).getPath())) {
+            Log.e("position", lastSong.getName());
             holder.mName.setTextColor(ContextCompat.getColorStateList(mContext, R.color.colorGreen));
-            EventBus.getDefault().postSticky(new EventBusHelper.lastSongView(holder.itemView));
+            EventBus.getDefault().postSticky(new EventBusHelper.lastSongPosition(position));
+            isLastSongChecked = true;
+        } else if (isLastSongChecked && data.get(position).isPlaying()) {
+            holder.mName.setTextColor(ContextCompat.getColorStateList(mContext, R.color.colorGreen));
         } else {
             holder.mName.setTextColor(ContextCompat.getColorStateList(mContext, R.color.colorWhite));
         }
 
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return super.getItemId(position);
     }
 
     @Override
@@ -117,5 +128,17 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         void onItemClick(View view, Integer position, String object);
     }
 
+/*
+    public void update(Song song) {
+
+        for (int i = 0; i < data.size(); i++) {
+            if(song.getPath().equals(data.get(i).getPath())){
+                data.get(i).setPlaying(true);
+            }else{
+
+            }
+        }
+    }
+*/
 
 }

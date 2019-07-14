@@ -7,7 +7,7 @@ class EventBusHelper {
 
     internal class permissionStatus(var status: String)
     internal class playingSong(var song: Song)
-    internal class lastSongView(var songView:View)
+    internal class lastSongPosition(var position:Int)
     internal class isShowMiniPl(var status:String)
     internal class songInformations(var song:Song)
     internal class songsQueue(var queue : ArrayList<Song>)
