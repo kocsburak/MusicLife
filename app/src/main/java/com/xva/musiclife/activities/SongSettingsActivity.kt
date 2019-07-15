@@ -25,19 +25,26 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
 
     private var mTAG = "SongSettings"
 
+    // Settingsinde Olduğumuz Şarkının Verileri
     private lateinit var song: Song
+
+    // Çalan Şarkı Verisi
     private var playingSong: Song? = null
+
+    //
     private lateinit var database: Database
+
+    // Favori Ve Kuyruga Eklenip/Eklenmediği Verisi Tutuyorlar
     private var isAddedToFavourite = false
     private var isAddedToQueue = false
+
+    // Şarkının Database Kayıtlı Olduğu id yi Tutacak
     private var songId = -1
 
-    private var EventBusSetup = false
 
     private fun log(key: String, value: String) {
         Log.e(mTAG + key, value)
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,11 +57,8 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
     override fun onStart() {
         super.onStart()
         log("OnStart", "Calisti")
-        if (!EventBusSetup) {
-            EventBusSetup = true
-            EventBus.getDefault().register(this)
-        }
-
+        EventBus.getDefault().register(this)
+        // TODO : Burda Uygulama Arka Plana Düşünce ve Tekrar Girince İstenmeyen Bir Durum Oluşabilir Kontrol Et
     }
 
     override fun onStop() {
@@ -62,7 +66,6 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
         log("OnStop", "Calisti")
         EventBus.getDefault().unregister(this)
     }
-
 
     private fun setClicks() {
         textViewCancel.setOnClickListener(this)
@@ -74,7 +77,6 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
         textViewQueue.setOnClickListener(this)
         imageViewChangePhoto.setOnClickListener(this)
         textViewChangePhoto.setOnClickListener(this)
-        log("setClicks", "Calisti")
     }
 
     @Subscribe(sticky = true)
@@ -85,7 +87,6 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
         checkSongIsAvailable()
     }
 
-
     @Subscribe(sticky = true)
     internal fun onDataEvent(data: EventBusHelper.playingSong) {
         log("EventBusPlayingSong", "Calisti")
@@ -93,13 +94,13 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
         playingSong = data.song
     }
 
-
+    // Şarkı İsim ve Artist Bilgisini Atamak TextViewlere
     private fun updateInformations() {
         textViewSongName.text = song.name
         textViewArtist.text = song.artist
     }
 
-
+    // Şarkı Databasaye Kayıt Edilmiş mi Kontrol Ediyoruz Edilmemiş ise Kayıt Edip Song Id sini Tutuyoruz
     private fun checkSongIsAvailable() {
         songId = database.isSongAvailable(song.path)
         if (songId != -1) {
@@ -114,7 +115,7 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-
+    // Şarkının Database De Kayıtlı Olan Fotografı var ise Alıyoruz
     private fun getSongPhoto() {
         var image = database.getPhoto(song.path)
         if (image != null) {
@@ -126,6 +127,7 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    // Database de Fotoğraf Yok ise Default Fotoğrafı Var mı Kontrol Ediyoruz
     private fun checkAlbumCoverIsAvailable() {
         if (song.image != null) {
             setSongPhoto(song.image!!)
@@ -139,6 +141,7 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
         log("setSongPhoto", "Calisti")
     }
 
+    //Şarkı Database de Favorilere Eklenmiş mi Kontrol Ediyoruz
     private fun checkIsSongAddedToFavourite() {
         if (database.isSongAddedToFavourite(songId) != -1) {
             log("checkIsSongAddedToFavourite!=-1", "Calisti")
@@ -146,7 +149,7 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-
+    // Icon ve TextViewları Favorilere Ekleniş Şekilde Degiştir
     private fun addToFavourite() {
         log("addToFavourite", "Calisti")
         imageViewFavourite.setImageResource(R.drawable.ic_favorite_green_24dp)
@@ -155,6 +158,7 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
         checkPlayingSongEqualThisSong(true)
     }
 
+    // Icon ve TextViewları Favorilerden Çıkarılmış Şekilde Degiştir
     private fun removeFromFavourite() {
         log("removeFromFavourite", "Calisti")
         imageViewFavourite.setImageResource(R.drawable.ic_favorite_white_24dp)
@@ -163,12 +167,14 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
         checkPlayingSongEqualThisSong(false)
     }
 
+    // Tıklanma Animasyonu
     private fun showFavouriteAnimation() {
         imageViewFavourite.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale))
         textViewFavourite.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale))
     }
 
-    // Çalan Şarkı İle Seçtigimiz Şarkı Aynı Ve Favourite Degişim İslemi Yapmışsak MiniPl bilgilendirilmeli
+    // @params status : Favorilere Eklendi Ve Eklenmedi Bilgisi Tutuyor
+    // Çalan Şarkı İle Seçtigimiz Şarkı Aynı ise Favori Ekleme/Çıkarma İşlemlerinde MiniPl ye Bilgi Göndererek Favori Simgesi Güncelleniyor
     private fun checkPlayingSongEqualThisSong(status: Boolean) {
         if (playingSong != null && playingSong!!.path == song.path) {
             log("checkPlayingSongEquelThisSong", "İçerde Calisti")
@@ -188,23 +194,22 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-
+    //Şarkıyı PlayListe Ekleme Activity si
     private fun startPlayListActivity() {
         startActivity(Intent(this, PlayListActivity::class.java))
         overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left)
     }
 
+    // Şarkıyı MiniPl deki Queue Ye Gönderme
     private fun addToQueue() {
         textViewQueue.text = resources.getString(R.string.text_added)
         isAddedToQueue = true
     }
 
-
     private fun showQueueAnimation() {
         imageViewQueue.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale))
         textViewQueue.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale))
     }
-
 
     private fun actionQueue() {
         if (!isAddedToQueue) {
@@ -216,13 +221,13 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    // Gallery İşlemleri
     private fun openGallery() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         intent.type = "image/*"
         startActivityForResult(Intent.createChooser(intent, getString(R.string.text_choose_a_photo)), 1)
         log("openGallery", "Calisti")
     }
-
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -237,18 +242,16 @@ class SongSettingsActivity : AppCompatActivity(), View.OnClickListener {
             val imageInByte = stream.toByteArray()
             database.updatePhoto(imageInByte, song.path)
             setSongPhoto(imageInByte)
-            log("SongSettingsByteArray",imageInByte.toString())
+            log("SongSettingsByteArray", imageInByte.toString())
 
 
         }
     }
 
-
     private fun showChangePhotoAnimation() {
         imageViewChangePhoto.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale))
         textViewChangePhoto.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale))
     }
-
 
     override fun onClick(v: View?) {
         when (v!!.id) {

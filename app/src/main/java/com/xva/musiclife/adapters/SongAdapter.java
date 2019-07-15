@@ -27,7 +27,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     private Context mContext;
     private Boolean isLastSongChecked = false;
 
-
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView mName;
         private TextView mArtist;
@@ -58,19 +57,22 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         return new MyViewHolder(itemView, listener);
     }
 
-
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         holder.mName.setText(data.get(position).getName());
         holder.mArtist.setText(data.get(position).getArtist());
+
+        // @params object : mainView -> Şarkı Değiştirmek İçin Tıklanıldı,settings -> Şarkı Ayarlarını Açmak İçin
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 listener.onItemClick(holder.itemView, position, "mainView");
+                // Çalan Şarkı Bilgisini Gönder
                 EventBus.getDefault().postSticky(new EventBusHelper.playingSong(data.get(position)));
-                lastSong = data.get(position);
-                Log.e("position", "" + data.get(position).getName());
+                // MiniPl yi Göster Bilgisi Gönder
                 EventBus.getDefault().postSticky(new EventBusHelper.isShowMiniPl("show"));
+
+                // TODO : Burda lastSong = data.get(position) kodunu sildik Gerekli bir kod muydu kontrol et
             }
         });
 
@@ -79,17 +81,19 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             public void onClick(View v) {
                 listener.onItemClick(holder.itemView, position, "settings");
                 holder.mSettings.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.scale));
+                // Hangi Şarkının Settingsine Gidecek İsek O Şarkını Bilgileri Gönderilir
                 EventBus.getDefault().postSticky(new EventBusHelper.songInformations(data.get(position)));
             }
         });
 
-
+         // Shared den Çekilen Son Çalan Bilgisi Hangi Şarkı İle Eşleşiyor ise O Şarkıyı Yeşil Renkte Göster
         if (!isLastSongChecked && lastSong.getPath().equals(data.get(position).getPath())) {
-            Log.e("position", lastSong.getName());
             holder.mName.setTextColor(ContextCompat.getColorStateList(mContext, R.color.colorGreen));
+            // Son Şarkının Text Rengini Tekrar Beyaz Yapmak İçin Song Fragmentte Position Degerini Gönderiyoruz
             EventBus.getDefault().postSticky(new EventBusHelper.lastSongPosition(position));
             isLastSongChecked = true;
         } else if (isLastSongChecked && data.get(position).isPlaying()) {
+            // Şarkı Değiştirilmesi Durumunda Çalan Şarkıyı Yeşil Renkli Yap
             holder.mName.setTextColor(ContextCompat.getColorStateList(mContext, R.color.colorGreen));
         } else {
             holder.mName.setTextColor(ContextCompat.getColorStateList(mContext, R.color.colorWhite));
@@ -123,22 +127,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         return data;
     }
 
-
     public interface onItemClick {
         void onItemClick(View view, Integer position, String object);
     }
 
-/*
-    public void update(Song song) {
-
-        for (int i = 0; i < data.size(); i++) {
-            if(song.getPath().equals(data.get(i).getPath())){
-                data.get(i).setPlaying(true);
-            }else{
-
-            }
-        }
-    }
-*/
 
 }

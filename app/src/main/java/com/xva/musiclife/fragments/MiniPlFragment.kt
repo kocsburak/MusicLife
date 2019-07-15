@@ -35,7 +35,6 @@ class MiniPlFragment() : Fragment() {
     private var mTAG = "MiniPlFragment"
 
     private lateinit var mView: View
-    private lateinit var database: Database
     private lateinit var songName: TextView
     private lateinit var artist: TextView
     private lateinit var actionButton: ImageView
@@ -43,24 +42,34 @@ class MiniPlFragment() : Fragment() {
     private lateinit var expandButton: ImageView
     private lateinit var favouriteButton: ImageView
     private lateinit var progressBar: ProgressBar
+
+    //
+    private lateinit var database: Database
+    private lateinit var sharedPrefencesHelper: SharedPrefencesHelper
+
     // Çalma Listeleri
     private var queue = ArrayList<Song>()
     private var playlist = ArrayList<Song>()
-    //
-    private lateinit var sharedPrefencesHelper: SharedPrefencesHelper
+
     // şarkını ilerleme  göstergeci handleri
     private var audioProgressUpdateHandler: Handler? = null
     private var handler: Handler = Handler()
+
     // service binder ı
     private var serviceBinder: PlayerServicesBinder? = null
-    //
+
+    //Çalan Şarkı Bilgisi
     private lateinit var playingSong: Song
+
     // oynat , durdur durum bilgisi
     private var actionStatus = "pause"
+
     // Play Liste de hangi indexteki şarkıda kaldık bilgisi
     private var playListSongIndex = 0
+
     // Favorilere eklenmis mi durumu
     private var isSongAddedToFavourite = false
+
     // Favorilere Ekleme Gibi Kısımlarda Kullanacagız
     private var songId = -1
 
@@ -85,6 +94,7 @@ class MiniPlFragment() : Fragment() {
         EventBus.getDefault().unregister(this)
     }
 
+    // Servise Baglanma
     private fun bindAudioService() {
         if (serviceBinder == null) {
             val intent = Intent(activity!!, PlayerServices::class.java)
@@ -94,13 +104,13 @@ class MiniPlFragment() : Fragment() {
         }
     }
 
+    // Servisi Koparma
     private fun unBoundAudioService() {
         if (serviceBinder != null) {
             log("unBoundAudioService","Çalıştı")
             activity!!.unbindService(serviceConnection)
         }
     }
-
 
     // Service Connection
     private val serviceConnection = object : ServiceConnection {
@@ -125,7 +135,7 @@ class MiniPlFragment() : Fragment() {
         serviceBinder!!.context = activity!!
     }
 
-
+    // Çalacak Şarkının Yol Bilgisini Güncelle
     private fun updateSongPath() {
         if (serviceBinder!!.audioFileUri != null) {
             serviceBinder!!.stopAudio()
@@ -138,7 +148,7 @@ class MiniPlFragment() : Fragment() {
         //audioServiceBinder.setAudioProgressUpdateHandler(audioProgressUpdateHandler);
     }
 
-
+    // Şarkı İlerleme Çubuğu Handleri
     private fun createProgressBarHandler() {
         log("createProgressBarHandler","Çalıştı")
         /* Initialize audio progress handler. */
@@ -198,6 +208,7 @@ class MiniPlFragment() : Fragment() {
         }
     }
 
+    // Kuyruktaki , PlayListedeki Şarkıları Çalma
     private fun nextSong() {
         if (queue.size > 0) {
             log("nextSongQueueSize>0","Çalıştı")

@@ -90,7 +90,7 @@ class Database(val context: Context) :
         val query = "SELECT * FROM $TABLE_SONG WHERE $COL_SONG_PATH = ?"
         val result = sqliteDB.rawQuery(query, Array<String>(1) { path })
 
-        while (result.moveToNext()) {
+        while (result.isFirst && result.moveToFirst()) {
             return result.getInt(0)
         }
         sqliteDB.close()

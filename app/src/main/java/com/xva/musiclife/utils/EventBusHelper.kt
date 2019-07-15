@@ -14,4 +14,5 @@ class EventBusHelper {
     internal class songForQueue(var song: Song)
     internal class playList(var playList:ArrayList<Song>)
     internal class favouriteStatus(var status : Boolean)
+    internal class setupMiniPl()
 }

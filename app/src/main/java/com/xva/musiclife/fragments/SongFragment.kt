@@ -35,25 +35,34 @@ import java.io.ByteArrayOutputStream
 class SongFragment() : Fragment(), SongAdapter.onItemClick {
 
 
+    private var mTAG = "SongFragment"
     private lateinit var mView: View
     private lateinit var songsAdapter: SongAdapter
     private lateinit var recyclerViewSongs: RecyclerView
-    private var songs = ArrayList<Song>()
     private lateinit var sharedPrefencesHelper: SharedPrefencesHelper
+    private var songs = ArrayList<Song>()
 
-    // permission callback code
+
+    // İzin Geri Bildirim Kodu
     private val READ_EXTERNAL_STORAGE_CODE = 10
-    // last song item view for change text color
-    private var lastPlayedSongPosition = -1
-    // handle shuffle button scroll
-    private var oldState = -10000
-    private var isDone = false
 
+    // Son Çalan Şarkının Listedeki Poziyon Bilgisi
+    private var lastPlayedSongPosition = -1
+    // Recycler View Kaydırma ki En Son Konumu
+    private var oldState = -10000
+    private var isShuffleButtonShowed = false
+
+
+    private fun log(key: String, value: String) {
+        Log.e(mTAG + key, value)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mView = inflater.inflate(R.layout.fragment_songs, container, false)
         sharedPrefencesHelper = SharedPrefencesHelper(activity!!)
         recyclerViewSongs = mView.findViewById(R.id.recylerViewSongs) as RecyclerView
+
+        // Shuffle Butonunu Listeyi Kaydırınca Gösterme İşlemi
         recyclerViewSongs.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
@@ -63,38 +72,43 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
                 super.onScrolled(recyclerView, dx, dy)
                 Log.e("dx", dy.toString())
                 if (dy > 0) {
-                    if (!isDone) {
-                        isDone = true
+                    if (!isShuffleButtonShowed) {
+                        isShuffleButtonShowed = true
                         showShuffleButton()
                     }
                 } else {
                     hideShuffleButton()
-                    isDone = false
+                    isShuffleButtonShowed = false
 
                 }
                 oldState = dy
 
             }
         })
+        // Şarkı Karıştır Butonu
         mView.buttonFirstShuffle.setOnClickListener {
 
             mView.buttonFirstShuffle.startAnimation(AnimationUtils.loadAnimation(activity!!, R.anim.scale))
         }
 
+        log("onCreate", "Çalıştı")
         return mView
     }
 
     override fun onStart() {
         super.onStart()
+        log("onStart", "Çalıştı")
         EventBus.getDefault().register(this)
         readPermission()
     }
 
     override fun onStop() {
         super.onStop()
+        log("onStop", "Çalıştı")
         EventBus.getDefault().unregister(this)
     }
 
+    // Datalara Erişim İzni
     private fun readPermission() {
         if (checkSelfPermission(
                 activity!!,
@@ -114,6 +128,11 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
         }
     }
 
+    private fun loadEverything() {
+        getSongs()
+    }
+
+    // MP3 Dosyalarını Çekme İşlemi
     private fun getSongs() {
         if (songs.size == 0) {
 
@@ -132,21 +151,21 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
                     )
 
 
-                    Log.e("path", song.path)
                     songs.add(song)
                 } while (cursor.moveToNext())
             }
         }
-
+        log("getSongs", "Çalıştı")
+/*
         var song = Song("ss", "ss", "ss", "ss", null, false)
         for (i in 0..20) {
             songs.add(song)
         }
-
+*/
         setupAdapter()
     }
 
-    fun getAlbumart(album_id: Long?): ByteArray? {
+    private fun getAlbumart(album_id: Long?): ByteArray? {
         var bm: Bitmap? = null
         try {
             val sArtworkUri = Uri
@@ -176,42 +195,44 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
     private fun setupAdapter() {
         songsAdapter = SongAdapter(songs, this, activity!!)
         recyclerViewSongs.adapter = songsAdapter
-        Log.e("size", songs.size.toString())
+        log("setupAdapter", "Çalıştı")
         if (songs.size > 0) {
             showList()
         }
     }
 
-    private fun loadEverything() {
-        getSongs()
-    }
-
+    // İzin Geri Bildirimi
     @Subscribe(sticky = true)
     internal fun onDataEvent(data: EventBusHelper.permissionStatus) {
 
         if (data.status == "granted") {
             loadEverything()
+            log("onEventPermissionStatus","Granted")
         } else {
             // TODO : Dialog ile İzin Lazım De Ve Ayarlara Götürecek bir button koy
             Toast.makeText(activity!!, "We Need Permission", Toast.LENGTH_LONG).show()
+            log("onEventPermissionStatus","Denied")
         }
 
     }
 
+    // Son Çalan Şarkının Position Degeri -> Textin  Yeşil Olan Rengini  Beyaz Yapmak İçin
     @Subscribe(sticky = true)
     internal fun onDataEvent(data: EventBusHelper.lastSongPosition) {
         // en son çalınan şarkının view ını aldık on item clickte rengini degiştirmek için
         this.lastPlayedSongPosition = data.position
+        log("onEventLastSongPosition","Çalıştı")
     }
 
+    // Çalan Şarkı Bilgisi -> Çalan Şarkının Text tini Yeşil Yapmak İçin
     @Subscribe(sticky = true)
     internal fun onDataEvent(data: EventBusHelper.playingSong) {
         findNewSongPosition(data.song)
-
+        log("onEventPlayinSong","Çalıştı")
     }
 
-
-    private fun findNewSongPosition(song:Song) {
+    // Çalan Şarkının Listede Hangi Poziyonda Olduğunu Bulmak
+    private fun findNewSongPosition(song: Song) {
 
         for (i in 0..songs.size) {
             if (song.path == songs[i].path) {
@@ -219,8 +240,10 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
                 break
             }
         }
+        log("findNewSongPosition","Çalıştı")
     }
 
+    // En Son Çalan Şarkının Rengini Beyaz , Çalan Şarkının Rengini Yeşil Yapma
     private fun changeSongTextColor(index: Int) {
         if (lastPlayedSongPosition != -1) {
             songs[lastPlayedSongPosition].isPlaying = false
@@ -230,12 +253,13 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
         songs[index].isPlaying = true
         songsAdapter.notifyItemChanged(index)
         lastPlayedSongPosition = index
+        log("changeSongTextColor","Çalıştı")
     }
 
-
+    // Şarkı Değiştir Yada Song Settingse Git
     override fun onItemClick(view: View?, position: Int?, `object`: String?) {
         if (`object` == "mainView") {
-              changeSongTextColor(position!!)
+            changeSongTextColor(position!!)
         } else {
             // Song Settings
             startSongsSetting()
