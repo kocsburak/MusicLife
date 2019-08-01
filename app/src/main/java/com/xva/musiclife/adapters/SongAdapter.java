@@ -3,7 +3,6 @@ package com.xva.musiclife.adapters;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +24,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     private SharedPrefencesHelper sharedPrefencesHelper;
     private Song lastSong;
     private Context mContext;
-    private Boolean isLastSongChecked = false;
+    private int lastSongPosition = -1;
+    private boolean isLastSongChecked = false;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView mName;
@@ -66,7 +66,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.onItemClick(holder.itemView, position, "mainView");
+                listener.onItemClick(holder.itemView, position,lastSongPosition,"mainView");
+                lastSongPosition = position;
+                sharedPrefencesHelper.saveLastSong(data.get(lastSongPosition));
                 // Çalan Şarkı Bilgisini Gönder
                 EventBus.getDefault().postSticky(new EventBusHelper.playingSong(data.get(position)));
                 // MiniPl yi Göster Bilgisi Gönder
@@ -79,25 +81,29 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.onItemClick(holder.itemView, position, "settings");
+                listener.onItemClick(holder.itemView, position, lastSongPosition,"settings");
                 holder.mSettings.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.scale));
                 // Hangi Şarkının Settingsine Gidecek İsek O Şarkını Bilgileri Gönderilir
                 EventBus.getDefault().postSticky(new EventBusHelper.songInformations(data.get(position)));
             }
         });
 
-         // Shared den Çekilen Son Çalan Bilgisi Hangi Şarkı İle Eşleşiyor ise O Şarkıyı Yeşil Renkte Göster
-        if (!isLastSongChecked && lastSong.getPath().equals(data.get(position).getPath())) {
-            holder.mName.setTextColor(ContextCompat.getColorStateList(mContext, R.color.colorGreen));
-            // Son Şarkının Text Rengini Tekrar Beyaz Yapmak İçin Song Fragmentte Position Degerini Gönderiyoruz
-            EventBus.getDefault().postSticky(new EventBusHelper.lastSongPosition(position));
+        // Shared den Çekilen Son Çalan Bilgisi Hangi Şarkı İle Eşleşiyor ise O Şarkıyı Yeşil Renkte Göster
+
+
+        if(lastSong.getPath().equals("-1")){
             isLastSongChecked = true;
-        } else if (isLastSongChecked && data.get(position).isPlaying()) {
+        }else if (!isLastSongChecked && lastSong.getPath().equals(data.get(position).getPath())) {
+            holder.mName.setTextColor(ContextCompat.getColorStateList(mContext, R.color.colorGreen));
+            lastSongPosition = position;
+            isLastSongChecked = true;
+        } else if (data.get(position).isPlaying()) {
             // Şarkı Değiştirilmesi Durumunda Çalan Şarkıyı Yeşil Renkli Yap
             holder.mName.setTextColor(ContextCompat.getColorStateList(mContext, R.color.colorGreen));
         } else {
             holder.mName.setTextColor(ContextCompat.getColorStateList(mContext, R.color.colorWhite));
         }
+
 
     }
 
@@ -128,7 +134,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
     }
 
     public interface onItemClick {
-        void onItemClick(View view, Integer position, String object);
+        void onItemClick(View view, Integer position,Integer lastSongPosition, String object);
     }
 
 

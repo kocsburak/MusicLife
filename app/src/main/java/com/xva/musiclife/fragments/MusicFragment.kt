@@ -17,7 +17,6 @@ import kotlinx.android.synthetic.main.fragment_music.view.*
 
 class MusicFragment : Fragment() {
 
-
     private lateinit var mView : View
     private var isLoaded = false
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -29,7 +28,6 @@ class MusicFragment : Fragment() {
 
         return mView
     }
-
 
 
     private fun setupFragments() {

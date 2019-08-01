@@ -17,4 +17,8 @@
     <string name="text_automatic_volume">Automatic Volume</string>
     <string name="text_cancel">Cancel</string>
     <string name="text_choose_a_photo">Choose A Photo</string>
+
+
+    <string name="error_went_wrong">Something Went Wrong!</string>
+    <string name="error_need_permission">We Need A Permission!</string>
 </resources>
