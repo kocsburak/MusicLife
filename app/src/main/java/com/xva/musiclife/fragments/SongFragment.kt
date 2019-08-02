@@ -5,21 +5,21 @@ import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.app.Fragment
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import com.xva.musiclife.R
 import com.xva.musiclife.activities.SongSettingsActivity
 import com.xva.musiclife.adapters.SongAdapter
 import com.xva.musiclife.data.SharedPrefencesHelper
 import com.xva.musiclife.models.Song
-import com.xva.musiclife.utils.EventBusHelper
 import kotlinx.android.synthetic.main.fragment_songs.view.*
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
 
 
 class SongFragment() : Fragment(), SongAdapter.onItemClick {
@@ -92,7 +92,7 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
     override fun onStop() {
         super.onStop()
         log("onStop", "Çalıştı")
-      //  EventBus.getDefault().unregister(this)
+        //  EventBus.getDefault().unregister(this)
     }
 
     // MP3 Dosyalarını Çekme İşlemi
@@ -133,6 +133,53 @@ class SongFragment() : Fragment(), SongAdapter.onItemClick {
         if (songs.size > 0) {
             showList()
         }
+        swipeDelete()
+    }
+
+    private fun swipeDelete() {
+
+        var swipeToDeleteCallback = object : SwipeToDeleteCallback(activity!!) {
+            override fun onSwiped(p0: RecyclerView.ViewHolder, p1: Int) {
+                var position = p0.adapterPosition
+                var item = songsAdapter.data[position]
+                songsAdapter.removeItem(position)
+                showDeleteAlertDialog(item,position)
+            }
+
+
+        }
+        var itemTouchhelper = ItemTouchHelper(swipeToDeleteCallback)
+        itemTouchhelper.attachToRecyclerView(recyclerViewSongs)
+
+    }
+
+    private fun showDeleteAlertDialog(item:Song,position: Int?){
+        val builder = AlertDialog.Builder(activity!!)
+
+        // Set the alert dialog title
+        builder.setTitle("ShhSHH")
+
+        // Display a message on alert dialog
+        builder.setMessage(getString(R.string.text_remove_item_question))
+
+        // Set a positive button and its click listener on alert dialog
+        builder.setPositiveButton(getString(R.string.text_yes)){dialog, which ->
+            Toast.makeText(activity!!,getString(R.string.text_item_has_removed),Toast.LENGTH_LONG).show()
+        }
+
+
+        // Display a negative button on alert dialog
+        builder.setNegativeButton(getString(R.string.text_no)){dialog,which ->
+            songsAdapter.restoreItem(item, position!!)
+        }
+
+        builder.setCancelable(false)
+
+        // Finally, make the alert dialog using builder
+        val dialog: AlertDialog = builder.create()
+
+        // Display the alert dialog on app interface
+        dialog.show()
     }
 
     private fun showList() {

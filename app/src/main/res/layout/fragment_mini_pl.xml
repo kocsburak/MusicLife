@@ -5,23 +5,70 @@
                                              android:layout_width="match_parent"
                                              android:layout_height="wrap_content">
 
+    <android.support.constraint.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"
+            android:animateLayoutChanges="true"
+            android:id="@+id/layoutProgress">
+
+        <SeekBar
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" android:id="@+id/seekBar" app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="@+id/groupSeekBar"
+                android:layout_marginStart="8dp" android:layout_marginTop="8dp"
+                app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+        <android.support.constraint.Group android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                          android:id="@+id/groupSeekBar"
+                                          app:constraint_referenced_ids="seekBar,textViewDurationStart,textViewDurationEnd"
+                                          android:visibility="gone"/>
+        <android.support.constraint.Group android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                          android:id="@+id/groupProgressBar"
+                                          app:constraint_referenced_ids="progressBar"/>
+        <ProgressBar
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="2dp"
+                android:id="@+id/progressBar"
+                android:background="@color/colorGray"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+        <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewDurationStart"
+                android:textSize="10sp"
+                app:layout_constraintTop_toBottomOf="@+id/seekBar" app:layout_constraintStart_toStartOf="@+id/seekBar"
+                android:layout_marginStart="8dp" android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent" android:layout_marginTop="8dp"/>
+        <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:id="@+id/textViewDurationEnd" app:layout_constraintEnd_toEndOf="@+id/seekBar"
+                android:layout_marginEnd="8dp" android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@+id/seekBar"/>
+    </android.support.constraint.ConstraintLayout>
     <ImageView
             android:layout_width="30dp"
             android:layout_height="30dp" app:srcCompat="@drawable/ic_play_circle_filled_blue_40dp"
             android:id="@+id/imageViewAction"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="16dp" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/progressBar"/>
+            android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layoutProgress"/>
 
     <ImageView
             android:layout_width="30dp"
             android:layout_height="30dp" app:srcCompat="@drawable/ic_whatshot_blue_40dp"
             android:id="@+id/imageViewBestPart"
-            android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginEnd="16dp" app:layout_constraintEnd_toStartOf="@+id/imageViewAction"
-            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/progressBar"/>
+            app:layout_constraintTop_toBottomOf="@+id/layoutProgress"/>
 
     <ImageView
             android:layout_width="wrap_content"
@@ -38,8 +85,8 @@
             android:id="@+id/imageViewFavourite"
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="16dp" android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/progressBar"/>
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/layoutProgress"/>
     <TextView
             android:text="TextView"
             android:layout_width="0dp"
@@ -51,8 +98,8 @@
             app:layout_constraintStart_toEndOf="@+id/imageViewFavourite"
             android:layout_marginStart="16dp"
             app:layout_constraintBottom_toTopOf="@+id/view"
-            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/progressBar"
-            android:layout_marginEnd="8dp" app:layout_constraintEnd_toStartOf="@+id/imageViewExpand"/>
+            android:layout_marginEnd="8dp" app:layout_constraintEnd_toStartOf="@+id/imageViewExpand"
+            app:layout_constraintTop_toBottomOf="@+id/layoutProgress" android:layout_marginTop="8dp"/>
     <TextView
             android:text="TextView"
             android:layout_width="0dp"
@@ -70,19 +117,11 @@
     <View
             android:layout_width="20dp"
             android:layout_height="1dp"
-            android:id="@+id/view" android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/view"
             android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
-            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"/>
-    <ProgressBar
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="0dp"
-            android:layout_height="2dp"
-            android:id="@+id/progressBar"
-            android:background="@color/colorGray"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp" android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/layoutProgress"/>
 
 
 </android.support.constraint.ConstraintLayout>

@@ -68,7 +68,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.MyViewHolder> 
             public void onClick(View v) {
                 listener.onItemClick(holder.itemView, position,lastSongPosition,"mainView");
                 lastSongPosition = position;
-                sharedPrefencesHelper.saveLastSong(data.get(lastSongPosition));
                 // Çalan Şarkı Bilgisini Gönder
                 EventBus.getDefault().postSticky(new EventBusHelper.playingSong(data.get(position)));
                 // MiniPl yi Göster Bilgisi Gönder

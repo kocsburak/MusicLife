@@ -90,7 +90,7 @@
             android:layout_marginLeft="5dp"
             android:clickable="true"
             android:layout_width="match_parent"
-            android:layout_height="50dp" android:visibility="gone">
+            android:layout_height="wrap_content" android:visibility="gone">
 
     </android.support.constraint.ConstraintLayout>
 

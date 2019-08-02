@@ -26,6 +26,7 @@ import com.xva.musiclife.models.Song
 import com.xva.musiclife.services.PlayerServices
 import com.xva.musiclife.services.PlayerServicesBinder
 import com.xva.musiclife.utils.EventBusHelper
+import kotlinx.android.synthetic.main.fragment_mini_pl.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
@@ -63,6 +64,7 @@ class MiniPlFragment() : Fragment() {
 
     // oynat , durdur durum bilgisi
     private var actionStatus = "pause"
+    private var expandStatus = "progressBar"
 
     // Play Liste de hangi indexteki şarkıda kaldık bilgisi
     private var playListSongIndex = 0
@@ -79,167 +81,9 @@ class MiniPlFragment() : Fragment() {
     }
 
 
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        // Services
-        log("onAttach","Çalıştı")
-        bindAudioService()
-        EventBus.getDefault().register(this)
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        log("onDetach","Çalıştı")
-        unBoundAudioService()
-        EventBus.getDefault().unregister(this)
-    }
-
-    // Servise Baglanma
-    private fun bindAudioService() {
-        if (serviceBinder == null) {
-            val intent = Intent(activity!!, PlayerServices::class.java)
-            log("bindAudioService==null","Çalıştı")
-            // Servise bağlanma
-            activity!!.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-        }
-    }
-
-    // Servisi Koparma
-    private fun unBoundAudioService() {
-        if (serviceBinder != null) {
-            log("unBoundAudioService","Çalıştı")
-            activity!!.unbindService(serviceConnection)
-        }
-    }
-
-    // Service Connection
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceDisconnected(name: ComponentName?) {
-            log("onServiceDisConnected","Çalıştı")
-            // DO Nothing...
-        }
-
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            log("onServiceConnected","Çalıştı")
-            serviceBinder = service as PlayerServicesBinder
-            setBinderContext()
-            updateSongPath()
-            createProgressBarHandler()
-        }
-
-    }
-
-    private fun setBinderContext() {
-        // Set application context.
-        log("setBinderContext","Çalıştı")
-        serviceBinder!!.context = activity!!
-    }
-
-    // Çalacak Şarkının Yol Bilgisini Güncelle
-    private fun updateSongPath() {
-        if (serviceBinder!!.audioFileUri != null) {
-            serviceBinder!!.stopAudio()
-        }
-        log("updateSongPath","Çalıştı")
-        serviceBinder!!.audioFileUri = Uri.parse(playingSong.path)
-
-        // Initialize audio progress bar updater Handler object.
-        // createAudioProgressbarUpdater();
-        //audioServiceBinder.setAudioProgressUpdateHandler(audioProgressUpdateHandler);
-    }
-
-    // Şarkı İlerleme Çubuğu Handleri
-    private fun createProgressBarHandler() {
-        log("createProgressBarHandler","Çalıştı")
-        /* Initialize audio progress handler. */
-        if (audioProgressUpdateHandler == null) {
-
-            audioProgressUpdateHandler = @SuppressLint("HandlerLeak")
-            object : Handler() {
-                override fun handleMessage(msg: Message) {
-                    // The update process message is sent from AudioServiceBinder class's thread object.
-                    if (serviceBinder != null && msg.what === serviceBinder!!.UPDATE_AUDIO_PROGRESS_BAR) {
-                        // Calculate the percentage.
-                        val currProgress = serviceBinder!!.audioProgress
-
-
-                        Log.e("currentProgress",currProgress.toString())
-                        // Update progressbar. Make the value 10 times to show more clear UI change.
-                        progressBar.progress = currProgress
-                        if (currProgress >= 100) {
-                            log("currentProgress==100","Çalıştı")
-                            // şarkı bitirse servisi durdur
-                            serviceBinder!!.stopAudio()
-                            // TODO : çalma kuyrugunu kontor et şarkı yok ise durdur varsa yeni şarkıya geç
-                            nextSong()
-                        }
-
-                    }
-                }
-            }
-            serviceBinder!!.audioProgressUpdateHandler = audioProgressUpdateHandler
-        }
-    }
-
-    // Kuyruga Eklenecek Şarkıyı Aldık
-    @Subscribe(sticky = true)
-    internal fun onDataEvent(data: EventBusHelper.songForQueue) {
-        log("onEventBusSongForQueue","Çalıştı")
-        queue.add(data.song)
-    }
-
-    @Subscribe(sticky = true)
-    internal fun onDataEvent(data: EventBusHelper.playList) {
-        // TODO : PlayList Fragmenttan(Songs Activity) Şarkı Açılırsa Ordan Yayınalanacak
-        // Play List Zaten Buraya Yayınlanarak Geliyor Player Activitydede Çek Direk
-        log("onEventBusPlaylist","Çalıştı")
-        playlist = data.playList
-    }
-
-    // Şarkı Çalarken Song Setting Gidip Favorite İşlemleri Yapılırsa MiniPl Haberdar Olsun Diye
-    @Subscribe(sticky = true)
-    internal fun onDataEvent(data: EventBusHelper.favouriteStatus) {
-        if (data.status) {
-            showGreenFavourite()
-            log("onEventBusFavouriteStatusTrue","Çalıştı")
-        } else {
-            log("onEventBusFavouriteStatusFalse","Çalıştı")
-            showBlueFavourite()
-        }
-    }
-
-    // Kuyruktaki , PlayListedeki Şarkıları Çalma
-    private fun nextSong() {
-        if (queue.size > 0) {
-            log("nextSongQueueSize>0","Çalıştı")
-            EventBus.getDefault().postSticky(EventBusHelper.playingSong(queue[0]))
-            queue.removeAt(0)
-            //TODO : Kuyrugu Player Activity İçin Yayınla
-        } else if (playlist.size > 0) {
-            log("nextSongPlayListSize>0","Çalıştı")
-            EventBus.getDefault().postSticky(EventBusHelper.playingSong(playlist[playListSongIndex]))
-            playListSongIndex++
-
-        } else {
-            log("nextSongNoSong","Çalıştı")
-            showPlayImage()
-            actionStatus = "pause"
-        }
-    }
-
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mView = inflater.inflate(R.layout.fragment_mini_pl, container, false)
         log("onCreateView","Çalıştı")
-        load()
-        setClick()
-        database = Database(activity!!)
-        checkSongIsAvailable()
-        return mView
-    }
-
-    //
-    private fun load() {
         songName = mView.findViewById(R.id.textViewSongName) as TextView
         artist = mView.findViewById(R.id.textViewArtist) as TextView
         actionButton = mView.findViewById(R.id.imageViewAction) as ImageView
@@ -248,14 +92,6 @@ class MiniPlFragment() : Fragment() {
         favouriteButton = mView.findViewById(R.id.imageViewFavourite) as ImageView
         progressBar = mView.findViewById(R.id.progressBar) as ProgressBar
         sharedPrefencesHelper = SharedPrefencesHelper(activity!!)
-
-
-        // Check Last Song
-        isLastSongAvailable()
-    }
-
-    private fun setClick() {
-
         actionButton.setOnClickListener {
 
             if (actionStatus == "pause") {
@@ -270,16 +106,21 @@ class MiniPlFragment() : Fragment() {
                 showActionAnimation()
             }
         }
-
         refrainButton.setOnClickListener {
             showRefrainAnimation()
         }
-
         expandButton.setOnClickListener {
             showExpandAnimation()
+            if(expandStatus == "progressBar"){
+                showSeekBar()
+                expandStatus = "seekBar"
+            }else{
+                showProgressBar()
+                expandStatus = "progressBar"
+            }
+
+
         }
-
-
         favouriteButton.setOnClickListener {
 
             if (!isSongAddedToFavourite) {
@@ -291,9 +132,13 @@ class MiniPlFragment() : Fragment() {
             }
             showFavouriteAnimation()
         }
-
-
+        // Check Last Song
+        isLastSongAvailable()
+        database = Database(activity!!)
+        checkSongIsAvailable()
+        return mView
     }
+
 
     // En son dinlenen şarkı bilgisi var mı kontrol et
     private fun isLastSongAvailable() {
@@ -311,26 +156,14 @@ class MiniPlFragment() : Fragment() {
         artist.text = playingSong.artist
     }
 
-    // Şarkıya Çalmak için Tıklanıldıgında şarkı bilgisi buraya düşecek
-    @Subscribe(sticky = true)
-    internal fun onDataEvent(data: EventBusHelper.playingSong) {
-        log("onEventBusPlayingSong","Çalıştı")
-        playingSong = data.song
-        updateSongPath()
-        handler.postDelayed(playSong(), 5)
-        showStopImage()
-        setSongDetail()
-        checkSongIsAvailable()
-        actionStatus = "playing"
-        // Hangi Acitivityden Şarkı Çalarsa Çalsın Bu Kısım Çalışacak
-        sharedPrefencesHelper.saveLastSong(playingSong)
-    }
+
 
     // Database de şarkıya ait kayıt var mı kontrol yoksa oluştur
     private fun checkSongIsAvailable() {
         log("checkSongIsAvailable","Çalıştı")
         if (playingSong.path != "-1") {
             songId = database.isSongAvailable(playingSong.path)
+            log("songId",songId.toString())
             if (songId == -1) {
                 database.addSong(playingSong.path)
                 songId = database.isSongAvailable(playingSong.path)
@@ -342,6 +175,7 @@ class MiniPlFragment() : Fragment() {
         }
     }
 
+
     // şarkı favorilere eklenmiş mi kontrol et
     private fun checkIsSongAddedToFavourite() {
         if (database.isSongAddedToFavourite(songId) != -1) {
@@ -352,6 +186,181 @@ class MiniPlFragment() : Fragment() {
             showBlueFavourite()
         }
     }
+
+
+
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        EventBus.getDefault().unregister(this)
+    }
+
+    // Kuyruga Eklenecek Şarkıyı Aldık
+    @Subscribe(sticky = true)
+    internal fun onDataEvent(data: EventBusHelper.serviceBinder) {
+        log("onEventBusSongForQueue","Çalıştı")
+        serviceBinder = data.serviceBinder
+        serviceBinder!!.context = activity!!
+        createProgressBarHandler()
+        // son şarkı bilgileri varsa çalınabilmesi için serviste güncelle
+        if(playingSong.path != "-1"){
+            updateSongPath()
+        }
+    }
+
+
+    // Şarkı İlerleme Çubuğu Handleri
+    private fun createProgressBarHandler() {
+        log("createProgressBarHandler","Çalıştı")
+        /* Initialize audio progress handler. */
+        if (audioProgressUpdateHandler == null) {
+
+            audioProgressUpdateHandler = @SuppressLint("HandlerLeak")
+            object : Handler() {
+                override fun handleMessage(msg: Message) {
+                    // The update process message is sent from AudioServiceBinder class's thread object.
+                    if (serviceBinder != null && msg.what === serviceBinder!!.UPDATE_AUDIO_PROGRESS_BAR) {
+                        // Calculate the percentage.
+                        val currProgress = serviceBinder!!.audioProgress
+
+                        Log.e("currentProgress",currProgress.toString())
+                        // Update progressbar. Make the value 10 times to show more clear UI change.
+                        progressBar.progress = currProgress
+                        seekBar.progress = currProgress
+                        if (currProgress >= 100) {
+                            log("currentProgress==100","Çalıştı")
+                            // şarkı bitirse servisi durdur
+                            serviceBinder!!.stopAudio()
+                            // TODO : çalma kuyrugunu kontor et şarkı yok ise durdur varsa yeni şarkıya geç
+                            nextSong()
+                        }
+
+                    }
+                }
+            }
+            serviceBinder!!.audioProgressUpdateHandler = audioProgressUpdateHandler
+        }
+    }
+
+
+    // Çalacak Şarkı Bilgileri Bu Kısma Düşecek
+    @Subscribe(sticky = true)
+    internal fun onDataEvent(data: EventBusHelper.playingSong) {
+        log("onEventBusPlayingSong","Çalıştı")
+        playingSong = data.song
+        updateSongPath()
+        handler.postDelayed(playSong(), 5)
+        showStopImage()
+        setSongDetail()
+        getSongBestPart()
+        // Databasede Şarkı Çalacak Şarkı Var mı Kontrol Et
+        checkSongIsAvailable()
+        // Başlat / Durdur Butonu İçin
+        actionStatus = "playing"
+        // Hangi Acitivityden Şarkı Çalarsa Çalsın Bu Kısım Çalışacak
+        sharedPrefencesHelper.saveLastSong(playingSong)
+    }
+
+
+
+    // Çalacak Şarkının Yol Bilgisini Güncelle
+    private fun updateSongPath() {
+        if (serviceBinder!!.audioFileUri != null) {
+            serviceBinder!!.stopAudio()
+        }
+        log("updateSongPath","Çalıştı")
+        serviceBinder!!.audioFileUri = Uri.parse(playingSong.path)
+
+        // Initialize audio progress bar updater Handler object.
+        // createAudioProgressbarUpdater();
+        //audioServiceBinder.setAudioProgressUpdateHandler(audioProgressUpdateHandler);
+    }
+
+    private fun getSongBestPart(){
+
+    }
+
+
+
+    // Song Settings ten Çalan Şarkının Favori Durum Bilgisi Buraya Düşecek
+    @Subscribe(sticky = true)
+    internal fun onDataEvent(data: EventBusHelper.favouriteStatus) {
+        if (data.status) {
+            showGreenFavourite()
+            log("onEventBusFavouriteStatusTrue","Çalıştı")
+        } else {
+            log("onEventBusFavouriteStatusFalse","Çalıştı")
+            showBlueFavourite()
+        }
+    }
+
+
+
+    // Kuyruga Eklenecek Şarkıyı Aldık
+    @Subscribe(sticky = true)
+    internal fun onDataEvent(data: EventBusHelper.songsQueue) {
+        log("onEventBusSongsQueue","Çalıştı")
+        if(data.queue.size > 0){
+            queue = data.queue
+        }
+    }
+
+    @Subscribe(sticky = true)
+    internal fun onDataEvent(data: EventBusHelper.playList) {
+        // TODO : PlayList Fragmenttan(Songs Activity) Şarkı Açılırsa Ordan Yayınalanacak
+        // Play List Zaten Buraya Yayınlanarak Geliyor Player Activitydede Çek Direk
+        log("onEventBusPlaylist","Çalıştı")
+        if(data.playList.size > 0){
+            playlist = data.playList
+            playListSongIndex = data.playListSongIndex
+        }
+    }
+
+    @Subscribe(sticky = true)
+    internal fun onDataEvent(data: EventBusHelper.removePlayList) {
+        // TODO : PlayList Fragmenttan(Songs Activity) Şarkı Açılırsa Ordan Yayınalanacak
+        // Play List Zaten Buraya Yayınlanarak Geliyor Player Activitydede Çek Direk
+        log("onEventBusRemovePlaylist","Çalıştı")
+        if(data.status){
+            playlist.clear()
+            playListSongIndex = 0
+        }
+    }
+
+
+
+    // Kuyruktaki , PlayListedeki Şarkıları Çalma
+    private fun nextSong() {
+        if (queue.size > 0) {
+            log("nextSongQueueSize>0","Çalıştı")
+            // Şarkıyı Yayınla
+            EventBus.getDefault().postSticky(EventBusHelper.playingSong(queue[0]))
+            queue.removeAt(0)
+            // Queue yi yeni şekli ile yayınlıyoruz
+            EventBus.getDefault().postSticky(EventBusHelper.songsQueue(queue))
+        } else if (playlist.size > 0) {
+            log("nextSongPlayListSize>0","Çalıştı")
+            // Şarkıyı Yayınla
+            EventBus.getDefault().postSticky(EventBusHelper.playingSong(playlist[playListSongIndex]))
+            playListSongIndex++
+            // Player Activity için PlayListi Güncelliyoruz
+            EventBus.getDefault().postSticky(EventBusHelper.playList(playlist,playListSongIndex))
+
+        } else {
+            log("nextSongNoSong","Çalıştı")
+            showPlayImage()
+            actionStatus = "pause"
+        }
+    }
+
+
+
+
+
 
     private fun playSong() = Runnable {
         serviceBinder!!.startAudio()
@@ -390,6 +399,18 @@ class MiniPlFragment() : Fragment() {
     private fun showExpandAnimation() {
         expandButton.startAnimation(AnimationUtils.loadAnimation(activity!!, R.anim.scale))
     }
+
+    private fun showProgressBar(){
+        groupProgressBar.visibility = View.VISIBLE
+        groupSeekBar.visibility = View.GONE
+    }
+
+    private fun showSeekBar(){
+        groupProgressBar.visibility = View.GONE
+        groupSeekBar.visibility = View.VISIBLE
+    }
+
+
 
     private fun showFavouriteAnimation() {
         favouriteButton.startAnimation(AnimationUtils.loadAnimation(activity!!, R.anim.scale))

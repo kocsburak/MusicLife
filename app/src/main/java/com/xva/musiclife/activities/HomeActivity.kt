@@ -111,6 +111,7 @@ class HomeActivity : AppCompatActivity(), View.OnClickListener {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             log("onServiceConnected","Çalıştı")
             serviceBinder = service as PlayerServicesBinder
+            EventBus.getDefault().postSticky(EventBusHelper.serviceBinder(serviceBinder))
         }
 
     }

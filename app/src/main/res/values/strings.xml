@@ -17,6 +17,11 @@
     <string name="text_automatic_volume">Automatic Volume</string>
     <string name="text_cancel">Cancel</string>
     <string name="text_choose_a_photo">Choose A Photo</string>
+    <string name="text_remove_item">Remove Item</string>
+    <string name="text_remove_item_question">Do You Want To Remove Item?</string>
+    <string name="text_yes">Yes</string>
+    <string name="text_no">No</string>
+    <string name="text_item_has_removed">Item Has Removed</string>
 
 
     <string name="error_went_wrong">Something Went Wrong!</string>

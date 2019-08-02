@@ -10,7 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import com.xva.musiclife.R;
-
 abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
     Context mContext;
     private Paint mClearPaint;
@@ -25,7 +24,7 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
         backgroundColor = Color.parseColor("#b80f0a");
         mClearPaint = new Paint();
         mClearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        deleteDrawable = ContextCompat.getDrawable(mContext, R.drawable.ic_favorite_blue_40dp);
+        deleteDrawable = ContextCompat.getDrawable(mContext, R.drawable.ic_delete_white_40dp);
         intrinsicWidth = deleteDrawable.getIntrinsicWidth();
         intrinsicHeight = deleteDrawable.getIntrinsicHeight();
     }
